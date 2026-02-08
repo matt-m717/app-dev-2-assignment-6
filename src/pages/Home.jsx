@@ -1,61 +1,63 @@
-import MovieGrid from '../components/MovieGrid';
+import { useEffect, useState } from "react";
+import MovieGrid from "../components/MovieGrid";
+import { getPopularMovies } from "../services/movieService";
+import LoadingSpinner from "../components/LoadingSpinner";
+import ErrorMessage from "../components/ErrorMessage";
 
-// Static movie data for template
-const staticMovies = [
-  {
-    id: 1,
-    title: "The Shawshank Redemption",
-    poster_path: "/placeholder-poster.jpg",
-    vote_average: 9.3,
-    release_date: "1994-09-23"
-  },
-  {
-    id: 2,
-    title: "The Godfather",
-    poster_path: "/placeholder-poster.jpg",
-    vote_average: 9.2,
-    release_date: "1972-03-14"
-  },
-  {
-    id: 3,
-    title: "The Dark Knight",
-    poster_path: "/placeholder-poster.jpg",
-    vote_average: 9.0,
-    release_date: "2008-07-18"
-  },
-  {
-    id: 4,
-    title: "Pulp Fiction",
-    poster_path: "/placeholder-poster.jpg",
-    vote_average: 8.9,
-    release_date: "1994-10-14"
-  },
-  {
-    id: 5,
-    title: "Forrest Gump",
-    poster_path: "/placeholder-poster.jpg",
-    vote_average: 8.8,
-    release_date: "1994-06-23"
-  },
-  {
-    id: 6,
-    title: "Inception",
-    poster_path: "/placeholder-poster.jpg",
-    vote_average: 8.7,
-    release_date: "2010-07-16"
-  }
-];
+function Home({ searchResults, onFavorite }) {
+    const [movies, setMovies] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-function Home() {
-  return (
-    <main className="main-content">
-      <div className="content-header">
-        <h2>Popular Movies</h2>
-        <p>Discover and save your favorite films</p>
-      </div>
-      <MovieGrid movies={staticMovies} />
-    </main>
-  );
-};
+    useEffect(() => {
+        const fetchMovies = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const movies = await getPopularMovies();
+                setMovies(movies);
+            } catch (e) {
+                setError("Failed to load movies.");
+                console.log(e);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchMovies();
+    }, []);
+
+    const displayedMovies = searchResults || movies;
+
+    if (loading) {
+        return (
+            <main className="main-content">
+                <LoadingSpinner />
+            </main>
+        );
+    }
+
+    if (error) {
+        return (
+            <main className="main-content">
+                <ErrorMessage message={error.message} />
+            </main>
+        );
+    }
+
+    return (
+        <main className="main-content">
+            <div className="content-header">
+                <h2>Popular Movies</h2>
+                <p>Discover and save your favorite films</p>
+            </div>
+            <MovieGrid
+                movies={displayedMovies}
+                onFavorite={onFavorite}
+                isFavorite={false}
+            />
+        </main>
+    );
+}
 
 export default Home;
