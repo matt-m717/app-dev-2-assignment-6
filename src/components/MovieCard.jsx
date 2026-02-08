@@ -3,7 +3,11 @@ function MovieCard({ movie, onFavorite, isFavorite }) {
         <div className="movie-card">
             <div className="movie-poster">
                 <img
-                    src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                    src={
+                        movie.poster_path
+                            ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                            : "https://placehold.co/300x450/667eea/ffffff?text=No+Poster"
+                    }
                     alt={movie.title}
                 />
             </div>
